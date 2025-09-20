@@ -1,3 +1,5 @@
+# v1.0.3
+- Changed the timestamp function to `std::localtime`
 # v1.0.2
 - *i actually did something this time*
 - Fixed the icon color logic, should now be:

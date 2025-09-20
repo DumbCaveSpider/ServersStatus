@@ -21,9 +21,6 @@ bool StatusPopup::setup() {
     setTitle("Servers Status");
     auto winSize = CCDirector::sharedDirector()->getWinSize();
 
-    // settings value
-
-
     // user internet
     userInternet = CCLabelBMFont::create("Internet Status: Checking...", "bigFont.fnt");
     userInternet->setColor({ 100, 100, 100 });

@@ -4,6 +4,7 @@
 #include <Geode/utils/web.hpp>
 #include "StatusMonitor.hpp"
 #include <ctime>
+#include <fmt/chrono.h>
 #include <iomanip>
 #include <sstream>
 #include <string>
@@ -12,16 +13,8 @@ using namespace geode::prelude;
 
 // its time to get the local timestamp
 static std::string getLocalTimestamp() {
-    std::time_t now = std::time(nullptr);
-    std::tm tm {};
-#ifdef _WIN32
-    localtime_s(&tm, &now);
-#else
-    localtime_r(&now, &tm);
-#endif
-    std::ostringstream oss;
-    oss << std::put_time(&tm, "%Y-%m-%d %H:%M:%S");
-    return oss.str();
+    auto now = std::time(nullptr);
+    return fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(now));
 }
 
 bool StatusMonitor::init(){
