@@ -17,7 +17,7 @@ StatusPopup* StatusPopup::create() {
 }
 
 bool StatusPopup::setup() {
-    setTitle("Internet Status");
+    setTitle("Server Status");
     auto winSize = CCDirector::sharedDirector()->getWinSize();
 
     // loading spin
@@ -40,7 +40,7 @@ bool StatusPopup::setup() {
     }
 
     // display boomlings server status
-    serverStatus = CCLabelBMFont::create("Boomling Status: Checking...", "bigFont.fnt");
+    serverStatus = CCLabelBMFont::create("Boomlings Status: Checking...", "bigFont.fnt");
     serverStatus->setPosition(m_mainLayer->getContentSize().width / 2, m_mainLayer->getContentSize().height / 2);
     serverStatus->setColor({ 100, 100, 100 });
     serverStatus->setScale(0.5f);
@@ -56,7 +56,7 @@ bool StatusPopup::setup() {
     }
 
     // display geode server status
-    geodeStatus = CCLabelBMFont::create("Geode Server Status: Checking...", "bigFont.fnt");
+    geodeStatus = CCLabelBMFont::create("GeodeSDK Status: Checking...", "bigFont.fnt");
     geodeStatus->setColor({ 100, 100, 100 });
     geodeStatus->setPosition(m_mainLayer->getContentSize().width / 2, m_mainLayer->getContentSize().height / 2 - 30);
     geodeStatus->setScale(0.5f);
@@ -117,16 +117,17 @@ void StatusPopup::checkInternetStatus() {
         userInternet->setColor({ 255, 0, 0 });
         return;
     }
-    geode::utils::web::WebRequest().get("https://www.google.com").listen([this](geode::utils::web::WebResponse* response) {
+    auto url = Mod::get()->getSettingValue<std::string>("internet_url");
+    geode::utils::web::WebRequest().get(url).listen([this, url](geode::utils::web::WebResponse* response) {
         if (!response || !response->ok()) {
-            log::debug("Internet offline or unreachable");
+            log::debug("{} offline or unreachable", url);
             if (userInternet) {
                 userInternet->setString("Internet Status: Offline");
                 userInternet->setColor({ 255, 0, 0 });
             }
             return;
         }
-        log::debug("Internet online");
+        log::debug("{} online", url);
         if (userInternet) {
             userInternet->setString("Internet Status: Online");
             userInternet->setColor({ 0, 255, 0 });
@@ -140,33 +141,33 @@ void StatusPopup::checkBoomlingsStatus() {
         if (!response || !response->ok()) {
             log::debug("Boomlings server offline or unreachable");
             if (serverStatus) {
-                serverStatus->setString("Boomling Status: Offline");
+                serverStatus->setString("Boomlings Status: Offline");
                 serverStatus->setColor({ 255, 0, 0 });
             }
             return;
         }
         log::debug("Boomlings server online");
         if (serverStatus) {
-            serverStatus->setString("Boomling Status: Online");
+            serverStatus->setString("Boomlings Status: Online");
             serverStatus->setColor({ 0, 255, 0 });
         }
     });
 }
 
 void StatusPopup::checkGeodeStatus() {
-    log::debug("checking Geode server status");
+    log::debug("checking GeodeSDK status");
     geode::utils::web::WebRequest().get("https://api.geode-sdk.org").listen([this](geode::utils::web::WebResponse* response) {
         if (!response || !response->ok()) {
-            log::debug("Geode server offline or unreachable");
+            log::debug("GeodeSDK offline or unreachable");
             if (geodeStatus) {
-                geodeStatus->setString("Geode Server Status: Offline");
+                geodeStatus->setString("GeodeSDK Status: Offline");
                 geodeStatus->setColor({ 255, 0, 0 });
             }
             return;
         }
-        log::debug("Geode server online");
+        log::debug("GeodeSDK online");
         if (geodeStatus) {
-            geodeStatus->setString("Geode Server Status: Online");
+            geodeStatus->setString("GeodeSDK Status: Online");
             geodeStatus->setColor({ 0, 255, 0 });
         }
     });
