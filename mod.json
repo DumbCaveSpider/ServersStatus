@@ -70,6 +70,8 @@
 			"type": "string",
 			"name": "Internet Check URL",
 			"description": "Set the URL to check for internet connectivity. Can be anything that isn't blocked by your country.",
+			"match": "(http|https):\\/\\/([\\w_-]+(?:(?:\\.[\\w_-]+)+))([\\w.,@?^=%&:\\/~+#-]*[\\w@?^=%&\\/~+#-])",
+			"filter": "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ:.-_/0123456789",
 			"default": "https://www.google.com"
 		},
 		"refresh_rate": {
