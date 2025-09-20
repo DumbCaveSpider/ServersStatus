@@ -10,11 +10,11 @@ protected:
     void checkInternetStatus();
     void checkBoomlingsStatus();
     void checkGeodeStatus();
-    void onModSettings(CCObject* sender);
-    
-    CCLabelBMFont* userInternet = nullptr;
-    CCLabelBMFont* serverStatus = nullptr;
-    CCLabelBMFont* geodeStatus = nullptr;
+    void onModSettings(CCObject *sender);
+
+    CCLabelBMFont *userInternet = nullptr;
+    CCLabelBMFont *serverStatus = nullptr;
+    CCLabelBMFont *geodeStatus = nullptr;
 
 public:
     static StatusPopup *create();

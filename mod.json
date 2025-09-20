@@ -8,8 +8,13 @@
 	},
 	"id": "arcticwoof.servers_status",
 	"name": "Servers Status",
-	"version": "v1.0.2",
+	"version": "v1.0.3",
 	"developer": "ArcticWoof",
+	"links": {
+		"source": "https://github.com/DumbCaveSpider/ServersStatus",
+		"homepage": "https://arcticwoof.com.au/",
+		"community": "https://dsc.gg/arcticwoof"
+	},
 	"description": "Display the server connections in game",
 	"tags": ["universal", "utility"],
 	"dependencies": {

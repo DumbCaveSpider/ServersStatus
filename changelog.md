@@ -1,5 +1,5 @@
 # v1.0.3
-- Changed the timestamp function to `std::localtime`
+- Changed the Boomlings status to check the most liked levels as an endpoint to determine if the server is up or down
 # v1.0.2
 - *i actually did something this time*
 - Fixed the icon color logic, should now be:
