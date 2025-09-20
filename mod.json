@@ -8,7 +8,7 @@
 	},
 	"id": "arcticwoof.servers_status",
 	"name": "Servers Status",
-	"version": "v1.0.0",
+	"version": "v1.0.1",
 	"developer": "ArcticWoof",
 	"description": "Display the server connections in game",
 	"tags": ["universal", "utility"],
