@@ -17,7 +17,7 @@ StatusPopup* StatusPopup::create() {
 }
 
 bool StatusPopup::setup() {
-    setTitle("Server Status");
+    setTitle("Servers Status");
     auto winSize = CCDirector::sharedDirector()->getWinSize();
 
     // loading spin
