@@ -1,3 +1,14 @@
+# v1.0.2
+- *i actually did something this time*
+- Fixed the icon color logic, should now be:
+  - <cg>Green if all services are up</c>
+  - <co>Orange if one or more services are down</c>
+  - <cr>Red if all services are down</c>
+- Refresh Rate is default to **60** seconds
+- Icon refreshes when the Status Popup is opened and when the status is checked
+- Added option to toggle notifications when a service goes down
+- Added option to customize the URL used for the Internet check
+- Internal Internet check is now only visible by mobile users
 # v1.0.1
 - i did absolutely nothing
 # v1.0.0

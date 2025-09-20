@@ -100,6 +100,17 @@ void StatusMonitor::updateStatus(float) {
     checkInternetStatus();
     checkBoomlingsStatus();
     checkGeodeStatus();
+
+    // check if one of them is offline then icon is red
+    if (!m_geode_ok || !m_boomlings_ok || !m_internet_ok) {
+        m_icon->setColor({ 255, 165, 0 }); // orange if one service is down
+    }
+    if (m_geode_ok && m_boomlings_ok && m_internet_ok) {
+        m_icon->setColor({ 0, 255, 0 }); // green is all services are up
+    }
+    if (!m_geode_ok && !m_boomlings_ok && !m_internet_ok) {
+        m_icon->setColor({ 255, 0, 0 }); // red is all services are down
+    }
 }
 
 
@@ -116,61 +127,74 @@ StatusMonitor* StatusMonitor::create() {
 void StatusMonitor::checkGeodeStatus() {
     log::debug("checking Geode server status");
     auto lastGeodeCheck = Mod::get()->getSavedValue<std::string>("last_geode_ok");
-    geode::utils::web::WebRequest().get("https://api.geode-sdk.org").listen([this, lastGeodeCheck](geode::utils::web::WebResponse* response) {
+    bool notification = Mod::get()->getSettingValue<bool>("notification");
+    geode::utils::web::WebRequest().get("https://api.geode-sdk.org").listen([this, lastGeodeCheck, notification](geode::utils::web::WebResponse* response) {
         if (!response || !response->ok()) {
             log::debug("GeodeSDK offline or unreachable");
-            Notification::create(fmt::format("Connection Lost to GeodeSDK Server at {}", lastGeodeCheck), NotificationIcon::Error)->show();
-            m_icon->setColor({255, 0, 0}); // red
+            if (notification) {
+                Notification::create(fmt::format("Connection Lost to GeodeSDK Server at {}", lastGeodeCheck), NotificationIcon::Error)->show();
+            }
+            m_geode_ok = false;
             return;
         }
         log::debug("GeodeSDK online at {}", lastGeodeCheck);
         Mod::get()->setSavedValue<std::string>("last_geode_ok", getLocalTimestamp());
-        m_icon->setColor({0, 255, 0}); // green
-
+        m_geode_ok = true;
+        return;
     });
 }
 
 void StatusMonitor::checkBoomlingsStatus() {
     log::debug("checking Boomlings server status");
     auto lastBoomlingsCheck = Mod::get()->getSavedValue<std::string>("last_boomlings_ok");
-    geode::utils::web::WebRequest().get("https://www.boomlings.com").listen([this, lastBoomlingsCheck](geode::utils::web::WebResponse* response) {
+    bool notification = Mod::get()->getSettingValue<bool>("notification");
+    geode::utils::web::WebRequest().get("https://www.boomlings.com").listen([this, lastBoomlingsCheck, notification](geode::utils::web::WebResponse* response) {
         if (!response || !response->ok()) {
             log::error("Boomlings server offline or unreachable");
-            Notification::create(fmt::format("Connection Lost to Boomlings Server at {}", lastBoomlingsCheck), NotificationIcon::Error)->show();
-            m_icon->setColor({255, 0, 0}); // red
+            if (notification) {
+                Notification::create(fmt::format("Connection Lost to Boomlings Server at {}", lastBoomlingsCheck), NotificationIcon::Error)->show();
+            }
+            m_boomlings_ok = false;
             return;
         }
         log::debug("Boomlings server online at {}", lastBoomlingsCheck);
         Mod::get()->setSavedValue<std::string>("last_boomlings_ok", getLocalTimestamp());
-        m_icon->setColor({0, 255, 0}); // green
+        m_boomlings_ok = true;
+        return;
     });
 }
 
 void StatusMonitor::checkInternetStatus() {
     log::debug("checking internet status");
     auto lastInternetCheck = Mod::get()->getSavedValue<std::string>("last_internet_ok");
+    bool notification = Mod::get()->getSettingValue<bool>("notification");
     auto url = Mod::get()->getSettingValue<std::string>("internet_url");
     if (Mod::get()->getSettingValue<bool>("doWeHaveInternet")) {
         if (GameToolbox::doWeHaveInternet()) {
             log::debug("{} online at {}", url, lastInternetCheck);
             Mod::get()->setSavedValue<std::string>("last_internet_ok", getLocalTimestamp());
-            m_icon->setColor({0, 255, 0}); // green
+            m_internet_ok = true;
             return;
         }
         log::error("{} offline or unreachable (used GameToolbox::doWeHaveInternet())", url);
-        Notification::create(fmt::format("Connection Lost to Internet at {}", lastInternetCheck), NotificationIcon::Error)->show();
+        if (notification) {
+            Notification::create(fmt::format("Connection Lost to Internet at {}", lastInternetCheck), NotificationIcon::Error)->show();
+        }
+        m_internet_ok = false;
         return;
     }
-    geode::utils::web::WebRequest().get(url).listen([this, lastInternetCheck, url](geode::utils::web::WebResponse* response) {
+    geode::utils::web::WebRequest().get(url).listen([this, lastInternetCheck, url, notification](geode::utils::web::WebResponse* response) {
         if (!response || !response->ok()) {
             log::error("{} offline or unreachable", url);
-            Notification::create(fmt::format("Connection Lost to Internet at {}", lastInternetCheck), NotificationIcon::Error)->show();
-            m_icon->setColor({255, 0, 0}); // red
+            if (notification) {
+                Notification::create(fmt::format("Connection Lost to Internet at {}", lastInternetCheck), NotificationIcon::Error)->show();
+            }
+            m_internet_ok = false;
             return;
         }
         log::debug("{} online at {}", url, lastInternetCheck);
         Mod::get()->setSavedValue<std::string>("last_internet_ok", getLocalTimestamp());
-        m_icon->setColor({0, 255, 0}); // green
+        m_internet_ok = true;
         return;
     });
 }

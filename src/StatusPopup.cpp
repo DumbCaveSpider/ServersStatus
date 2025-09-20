@@ -3,6 +3,7 @@
 #include <Geode/utils/web.hpp>
 #include <Geode/ui/GeodeUI.hpp>
 #include "StatusPopup.hpp"
+#include "StatusMonitor.hpp"
 
 using namespace geode::prelude;
 
@@ -20,8 +21,8 @@ bool StatusPopup::setup() {
     setTitle("Servers Status");
     auto winSize = CCDirector::sharedDirector()->getWinSize();
 
-    // loading spin
-    auto spinner = LoadingSpinner::create(20.f);
+    // settings value
+
 
     // user internet
     userInternet = CCLabelBMFont::create("Internet Status: Checking...", "bigFont.fnt");
@@ -95,6 +96,14 @@ bool StatusPopup::setup() {
     checkInternetStatus();
     checkBoomlingsStatus();
     checkGeodeStatus();
+    // immediate status refresh on the existing monitor instance
+    if (auto scene = CCDirector::sharedDirector()->getRunningScene()) {
+        if (auto node = scene->getChildByID("status-monitor")) {
+            if (auto monitor = typeinfo_cast<StatusMonitor*>(node)) {
+                monitor->updateStatus(0.0f);
+            }
+        }
+    }
 
     return true;
 }
