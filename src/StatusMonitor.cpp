@@ -3,8 +3,26 @@
 #include <Geode/modify/CCMenu.hpp>
 #include <Geode/utils/web.hpp>
 #include "StatusMonitor.hpp"
+#include <ctime>
+#include <iomanip>
+#include <sstream>
+#include <string>
 
 using namespace geode::prelude;
+
+// its time to get the local timestamp
+static std::string getLocalTimestamp() {
+    std::time_t now = std::time(nullptr);
+    std::tm tm {};
+#ifdef _WIN32
+    localtime_s(&tm, &now);
+#else
+    localtime_r(&now, &tm);
+#endif
+    std::ostringstream oss;
+    oss << std::put_time(&tm, "%Y-%m-%d %H:%M:%S");
+    return oss.str();
+}
 
 bool StatusMonitor::init(){
     if (!CCMenu::init()) return false;
@@ -106,6 +124,7 @@ void StatusMonitor::checkGeodeStatus() {
             return;
         }
         log::debug("GeodeSDK online at {}", lastGeodeCheck);
+        Mod::get()->setSavedValue<std::string>("last_geode_ok", getLocalTimestamp());
         m_icon->setColor({0, 255, 0}); // green
 
     });
@@ -122,6 +141,7 @@ void StatusMonitor::checkBoomlingsStatus() {
             return;
         }
         log::debug("Boomlings server online at {}", lastBoomlingsCheck);
+        Mod::get()->setSavedValue<std::string>("last_boomlings_ok", getLocalTimestamp());
         m_icon->setColor({0, 255, 0}); // green
     });
 }
@@ -133,6 +153,7 @@ void StatusMonitor::checkInternetStatus() {
     if (Mod::get()->getSettingValue<bool>("doWeHaveInternet")) {
         if (GameToolbox::doWeHaveInternet()) {
             log::debug("{} online at {}", url, lastInternetCheck);
+            Mod::get()->setSavedValue<std::string>("last_internet_ok", getLocalTimestamp());
             m_icon->setColor({0, 255, 0}); // green
             return;
         }
@@ -148,7 +169,8 @@ void StatusMonitor::checkInternetStatus() {
             return;
         }
         log::debug("{} online at {}", url, lastInternetCheck);
-            m_icon->setColor({0, 255, 0}); // green
-            return;
+        Mod::get()->setSavedValue<std::string>("last_internet_ok", getLocalTimestamp());
+        m_icon->setColor({0, 255, 0}); // green
+        return;
     });
 }

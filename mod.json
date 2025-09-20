@@ -75,7 +75,7 @@
 		"refresh_rate": {
 			"type": "float",
 			"name": "Refresh Rate",
-			"description": "Set how often (in seconds) the status should refresh. <cr>Lower the value, the more often it checks and may cause you to get rate limited!",
+			"description": "Set how often (in seconds) the status should refresh. <cy>Restart required.</cy> <cr>Lower the value, the more often it checks and may cause you to get rate limited!",
 			"default": 10.0,
 			"min": 1.0,
 			"max": 3600.0
