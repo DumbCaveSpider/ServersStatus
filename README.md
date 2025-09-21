@@ -8,6 +8,8 @@ The following colors are used to indicate the status:
 
 <cy>You can customize the Internet Icon Status in the mod settings!</cy>
 
+<cr>If you encounter a popup showing behind the menu with this mod, install [To the top! by Alphalaneous](id:alphalaneous.to_the_top) as it might fix the issue.</c>
+<cr>*For technical reason: keepAcrossScenes is used to keep the icon across scenes, but using this function causes getHighestChildZ to break. This is something that I cannot fix.*</c>
 *Suggested by [Pr0Cr4eat3r275](user:30972993)*
 
 ![king](arcticwoof.twitch_interactive/king.png)
