@@ -8,7 +8,7 @@
 	},
 	"id": "arcticwoof.servers_status",
 	"name": "Servers Status",
-	"version": "v1.0.4",
+	"version": "v1.0.5",
 	"developer": "ArcticWoof",
 	"links": {
 		"source": "https://github.com/DumbCaveSpider/ServersStatus",
@@ -17,12 +17,6 @@
 	},
 	"description": "Display the server connections in game",
 	"tags": ["universal", "utility"],
-	"dependencies": {
-		"geode.node-ids": {
-			"version": ">=1.0.0",
-			"importance": "required"
-		}
-	},
 	"resources": {
 		"sprites": [
 			"resources/*"
@@ -32,7 +26,7 @@
 		"enabled": {
 			"type": "bool",
 			"name": "Enable Icon Status",
-			"description": "Enable or disable the icon status in the top right corner",
+			"description": "Enable or disable the icon status",
 			"default": true
 		},
 		"title": {
@@ -42,7 +36,7 @@
 		"opacity": {
 			"type": "int",
 			"name": "Icon Opacity",
-			"description": "Set the opacity of the icon status in the top right corner",
+			"description": "Set the opacity of the icon status",
 			"default": 100,
 			"min": 10,
 			"max": 255
@@ -50,7 +44,7 @@
 		"scale": {
 			"type": "float",
 			"name": "Icon Scale",
-			"description": "Set the scale of the icon status in the top right corner",
+			"description": "Set the scale of the icon status",
 			"default": 0.4,
 			"min": 0.1,
 			"max": 2.0
@@ -58,7 +52,7 @@
 		"position": {
 			"type": "string",
 			"name": "Icon Position",
-			"description": "Set the position of the icon status in the top right corner",
+			"description": "Set the position of the icon status",
 			"default": "Top Right",
 			"one-of": [
 				"Top Right",
@@ -102,7 +96,7 @@
 		"doWeHaveInternet": {
 			"type": "bool",
 			"name": "Use Internal Internet Check",
-			"description": "Use <cy>GameToolbox::doWeHaveInternet()</c> function to check for internet connectivity instead of a web request. <cg>Intended for mobile devices, otherwise it will always return true</cg>",
+			"description": "Use <cy>GameToolbox::doWeHaveInternet()</c> function to check for internet connectivity instead of a web request. <cg>Intended for mobile devices. Reliable but annoying with the 'No Internet Connection error' popup.</cg>",
 			"default": false,
 			"platforms": [
 				"android",

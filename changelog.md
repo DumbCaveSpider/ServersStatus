@@ -1,3 +1,7 @@
+# v1.0.5
+- Removed Node ID since it's not needed
+- Fixed the mod settings descriptions
+- Attempted to fix the ZOrder bug
 # v1.0.4
 - Fixed a critical bug where close menu doesn't exist on mobile players, causing the game to crash on launch :panik:
 # v1.0.3
