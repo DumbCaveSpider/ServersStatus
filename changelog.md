@@ -1,3 +1,5 @@
+# v1.0.4
+- Fixed a critical bug where close menu doesn't exist on mobile players, causing the game to crash on launch :panik:
 # v1.0.3
 - Changed the Boomlings status to check the most liked levels as an endpoint to determine if the server is up or down
 # v1.0.2

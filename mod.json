@@ -8,7 +8,7 @@
 	},
 	"id": "arcticwoof.servers_status",
 	"name": "Servers Status",
-	"version": "v1.0.3",
+	"version": "v1.0.4",
 	"developer": "ArcticWoof",
 	"links": {
 		"source": "https://github.com/DumbCaveSpider/ServersStatus",
