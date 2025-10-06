@@ -10,7 +10,7 @@ using namespace geode::prelude;
 StatusPopup *StatusPopup::create()
 {
     auto ret = new StatusPopup();
-    if (ret && ret->initAnchored(300.f, 180.f))
+    if (ret && ret->initAnchored(300.f, 280.f))
     {
         ret->autorelease();
         return ret;
@@ -72,6 +72,22 @@ bool StatusPopup::setup()
         m_mainLayer->addChild(geodeStatusTS);
     }
 
+    // display Argon status (below GeodeSDK)
+    argonStatus = CCLabelBMFont::create("Argon Status: Checking...", "bigFont.fnt");
+    argonStatus->setColor({100, 100, 100});
+    argonStatus->setPosition(m_mainLayer->getContentSize().width / 2, geodeStatus->getPositionY() - 30);
+    argonStatus->setScale(0.5f);
+    m_mainLayer->addChild(argonStatus);
+    // subtext timestamp
+    {
+        auto last = Mod::get()->getSavedValue<std::string>("last_argon_ok");
+        std::string text = std::string("Last checked: ") + last;
+        auto argonStatusTS = CCLabelBMFont::create(text.c_str(), "chatFont.fnt");
+        argonStatusTS->setPosition(argonStatus->getPositionX(), argonStatus->getPositionY() - 15);
+        argonStatusTS->setScale(0.5f);
+        m_mainLayer->addChild(argonStatusTS);
+    }
+
     // mod settings button
     auto modSettingsMenu = CCMenu::create();
     modSettingsMenu->setPosition({0, 0});
@@ -94,6 +110,7 @@ bool StatusPopup::setup()
     checkInternetStatus();
     checkBoomlingsStatus();
     checkGeodeStatus();
+    checkArgonStatus();
     // immediate status refresh on the existing monitor instance
     if (auto scene = CCDirector::sharedDirector()->getRunningScene())
     {
@@ -160,7 +177,7 @@ void StatusPopup::checkBoomlingsStatus()
         .post(url)
         .listen([this](geode::utils::web::WebResponse *response)
                 {
-            if (!response || !response->ok()) {
+            if (!response || response->code() != 200) {
                 log::debug("Boomlings server offline or unreachable");
                 if (serverStatus) {
                     serverStatus->setString("Boomlings Status: Offline");
@@ -193,4 +210,26 @@ void StatusPopup::checkGeodeStatus()
             geodeStatus->setString("GeodeSDK Status: Online");
             geodeStatus->setColor({ 0, 255, 0 });
         } });
-};
+}
+
+void StatusPopup::checkArgonStatus()
+{
+    log::debug("checking Argon server status");
+    auto url = "https://argon.globed.dev/";
+
+    geode::utils::web::WebRequest().get(url).listen([this, url](geode::utils::web::WebResponse *response)
+                                                    {
+                    if (!response || response->code() != 200) {
+                        log::debug("Argon server offline or unreachable");
+                        if (argonStatus) {
+                            argonStatus->setString("Argon Status: Offline");
+                            argonStatus->setColor({255, 0, 0});
+                        }
+                        return;
+                    }
+                    log::debug("Argon server online");
+                    if (argonStatus) {
+                        argonStatus->setString("Argon Status: Online");
+                        argonStatus->setColor({0, 255, 0});
+                    } });
+}

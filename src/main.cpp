@@ -26,7 +26,7 @@ class $modify(StatusMenuLayer, MenuLayer) {
             CircleButtonSprite::create(
                 wifiIcon,
                 CircleBaseColor::Green,
-                CircleBaseSize::Small
+                CircleBaseSize::Medium
             ),
             this,
             menu_selector(StatusMenuLayer::onStatusButton)

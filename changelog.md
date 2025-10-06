@@ -1,3 +1,6 @@
+# v1.0.6
+- Added Argon status check
+
 # v1.0.5
 - Removed Node ID since it's not needed
 - Fixed the mod settings descriptions

@@ -111,17 +111,18 @@ void StatusMonitor::updateStatus(float)
     checkInternetStatus();
     checkBoomlingsStatus();
     checkGeodeStatus();
+    checkArgonStatus();
 
     // check if one of them is offline then icon is red
-    if (!m_geode_ok || !m_boomlings_ok || !m_internet_ok)
+    if (!m_geode_ok || !m_boomlings_ok || !m_internet_ok || !m_argon_ok)
     {
         m_icon->setColor({255, 165, 0}); // orange if one service is down
     }
-    if (m_geode_ok && m_boomlings_ok && m_internet_ok)
+    if (m_geode_ok && m_boomlings_ok && m_internet_ok && m_argon_ok)
     {
         m_icon->setColor({0, 255, 0}); // green is all services are up
     }
-    if (!m_geode_ok && !m_boomlings_ok && !m_internet_ok)
+    if (!m_geode_ok && !m_boomlings_ok && !m_internet_ok && !m_argon_ok)
     {
         m_icon->setColor({255, 0, 0}); // red is all services are down
     }
@@ -174,7 +175,7 @@ void StatusMonitor::checkBoomlingsStatus()
         .post(url)
         .listen([this, lastBoomlingsCheck, notification](geode::utils::web::WebResponse *response)
                 {
-        if (!response || !response->ok()) {
+        if (!response || response->code() != 200) {
             log::error("Boomlings server offline or unreachable");
             if (notification) {
                 Notification::create(fmt::format("Connection Lost to Boomlings Server at {}", lastBoomlingsCheck), NotificationIcon::Error)->show();
@@ -224,5 +225,26 @@ void StatusMonitor::checkInternetStatus()
         log::debug("{} online at {}", url, lastInternetCheck);
         Mod::get()->setSavedValue<std::string>("last_internet_ok", getLocalTimestamp());
         m_internet_ok = true;
+        return; });
+}
+
+void StatusMonitor::checkArgonStatus()
+{
+    log::debug("checking Argon server status");
+    auto lastArgonCheck = Mod::get()->getSavedValue<std::string>("last_argon_ok");
+    bool notification = Mod::get()->getSettingValue<bool>("notification");
+    geode::utils::web::WebRequest().get("https://argon.globed.dev/").listen([this, lastArgonCheck, notification](geode::utils::web::WebResponse *response)
+                                                                            {
+        if (!response || response->code() != 200) {
+            log::debug("Argon offline or unreachable");
+            if (notification) {
+                Notification::create(fmt::format("Connection Lost to Argon Server at {}", lastArgonCheck), NotificationIcon::Error)->show();
+            }
+            m_argon_ok = false;
+            return;
+        }
+        log::debug("Argon online at {}", lastArgonCheck);
+        Mod::get()->setSavedValue<std::string>("last_argon_ok", getLocalTimestamp());
+        m_argon_ok = true;
         return; });
 }
