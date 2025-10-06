@@ -10,7 +10,7 @@ using namespace geode::prelude;
 StatusPopup *StatusPopup::create()
 {
     auto ret = new StatusPopup();
-    if (ret && ret->initAnchored(300.f, 280.f))
+    if (ret && ret->initAnchored(300.f, 200.f))
     {
         ret->autorelease();
         return ret;
@@ -24,68 +24,80 @@ bool StatusPopup::setup()
     setTitle("Servers Status");
     auto winSize = CCDirector::sharedDirector()->getWinSize();
 
-    // user internet
+    // evenly space the status labels
+    const float width = m_mainLayer->getContentSize().width;
+    const float height = m_mainLayer->getContentSize().height;
+    const float centerX = width / 2.0f;
+    const float centerY = height / 2.0f;
+
+    // number of main status lines and spacing between them
+    const int lines = 4;
+    const float spacing = 30.0f;
+    // top-most label Y (so labels are centered vertically as a group)
+    const float topY = centerY + spacing * (lines - 1) / 2.0f;
+
+    // Internet
     userInternet = CCLabelBMFont::create("Internet Status: Checking...", "bigFont.fnt");
     userInternet->setColor({100, 100, 100});
-    userInternet->setPosition(m_mainLayer->getContentSize().width / 2, m_mainLayer->getContentSize().height / 2 + 30);
     userInternet->setScale(0.5f);
+    userInternet->setPosition({centerX, topY});
     m_mainLayer->addChild(userInternet);
-    // subtext timestamp
+    // timestamp under Internet
     {
         auto last = Mod::get()->getSavedValue<std::string>("last_internet_ok");
         std::string text = std::string("Last checked: ") + last;
-        auto userInternetTS = CCLabelBMFont::create(text.c_str(), "chatFont.fnt");
-        userInternetTS->setPosition(userInternet->getPositionX(), userInternet->getPositionY() - 15);
-        userInternetTS->setScale(0.5f);
-        m_mainLayer->addChild(userInternetTS);
+        auto lbl = CCLabelBMFont::create(text.c_str(), "chatFont.fnt");
+        lbl->setScale(0.5f);
+        lbl->setPosition({centerX, topY - 15});
+        m_mainLayer->addChild(lbl);
     }
 
-    // display boomlings server status
+    // Boomlings (next line)
     serverStatus = CCLabelBMFont::create("Boomlings Status: Checking...", "bigFont.fnt");
-    serverStatus->setPosition(m_mainLayer->getContentSize().width / 2, m_mainLayer->getContentSize().height / 2);
     serverStatus->setColor({100, 100, 100});
     serverStatus->setScale(0.5f);
+    serverStatus->setPosition({centerX, topY - spacing});
     m_mainLayer->addChild(serverStatus);
-    // subtext timestamp
+    // timestamp under Boomlings
     {
         auto last = Mod::get()->getSavedValue<std::string>("last_boomlings_ok");
         std::string text = std::string("Last checked: ") + last;
-        auto serverStatusTS = CCLabelBMFont::create(text.c_str(), "chatFont.fnt");
-        serverStatusTS->setPosition(serverStatus->getPositionX(), serverStatus->getPositionY() - 15);
-        serverStatusTS->setScale(0.5f);
-        m_mainLayer->addChild(serverStatusTS);
+        auto lbl = CCLabelBMFont::create(text.c_str(), "chatFont.fnt");
+        lbl->setScale(0.5f);
+        lbl->setPosition({centerX, topY - spacing - 15});
+        m_mainLayer->addChild(lbl);
     }
 
-    // display geode server status
+    // GeodeSDK (next line)
     geodeStatus = CCLabelBMFont::create("GeodeSDK Status: Checking...", "bigFont.fnt");
     geodeStatus->setColor({100, 100, 100});
-    geodeStatus->setPosition(m_mainLayer->getContentSize().width / 2, m_mainLayer->getContentSize().height / 2 - 30);
     geodeStatus->setScale(0.5f);
+    geodeStatus->setPosition({centerX, topY - spacing * 2});
     m_mainLayer->addChild(geodeStatus);
-    // subtext timestamp
+    // timestamp under Geode
     {
         auto last = Mod::get()->getSavedValue<std::string>("last_geode_ok");
         std::string text = std::string("Last checked: ") + last;
-        auto geodeStatusTS = CCLabelBMFont::create(text.c_str(), "chatFont.fnt");
-        geodeStatusTS->setPosition(geodeStatus->getPositionX(), geodeStatus->getPositionY() - 15);
-        geodeStatusTS->setScale(0.5f);
-        m_mainLayer->addChild(geodeStatusTS);
+        auto lbl = CCLabelBMFont::create(text.c_str(), "chatFont.fnt");
+        lbl->setScale(0.5f);
+        lbl->setPosition({centerX, topY - spacing * 2 - 15});
+        m_mainLayer->addChild(lbl);
     }
 
-    // display Argon status (below GeodeSDK)
+    // Argon (next line)
     argonStatus = CCLabelBMFont::create("Argon Status: Checking...", "bigFont.fnt");
     argonStatus->setColor({100, 100, 100});
-    argonStatus->setPosition(m_mainLayer->getContentSize().width / 2, geodeStatus->getPositionY() - 30);
     argonStatus->setScale(0.5f);
+    argonStatus->setPosition({centerX, topY - spacing * 3});
     m_mainLayer->addChild(argonStatus);
-    // subtext timestamp
+    // timestamp under Argon
     {
         auto last = Mod::get()->getSavedValue<std::string>("last_argon_ok");
         std::string text = std::string("Last checked: ") + last;
-        auto argonStatusTS = CCLabelBMFont::create(text.c_str(), "chatFont.fnt");
-        argonStatusTS->setPosition(argonStatus->getPositionX(), argonStatus->getPositionY() - 15);
-        argonStatusTS->setScale(0.5f);
-        m_mainLayer->addChild(argonStatusTS);
+        auto lbl = CCLabelBMFont::create(text.c_str(), "chatFont.fnt");
+        lbl->setScale(0.5f);
+        lbl->setPosition({centerX, topY - spacing * 3 - 15});
+        m_mainLayer->addChild(lbl);
     }
 
     // mod settings button
