@@ -4,6 +4,7 @@
 #include <Geode/ui/GeodeUI.hpp>
 #include "StatusPopup.hpp"
 #include "StatusMonitor.hpp"
+#include "CustomStatusPopup.hpp"
 
 using namespace geode::prelude;
 
@@ -117,6 +118,20 @@ bool StatusPopup::setup()
         menu_selector(StatusPopup::onModSettings));
     modSettingsMenu->addChild(modSettingsButton);
     m_mainLayer->addChild(modSettingsMenu);
+
+    // button to open the custom status popup
+    auto customMenu = CCMenu::create();
+    customMenu->setPosition({centerX, 0.f});
+    m_mainLayer->addChild(customMenu, 5);
+
+    auto customButtonSprite = ButtonSprite::create("Show Custom", "goldFont.fnt", "GJ_button_01.png", 0.65f);
+
+    auto customButton = CCMenuItemSpriteExtra::create(
+        customButtonSprite,
+        this,
+        menu_selector(StatusPopup::onOpenCustomStatus));
+    customButton->setID("status-popup-open-custom");
+    customMenu->addChild(customButton);
 
     // check server status
     checkInternetStatus();
@@ -244,4 +259,12 @@ void StatusPopup::checkArgonStatus()
                         argonStatus->setString("Argon Status: Online");
                         argonStatus->setColor({0, 255, 0});
                     } });
+}
+
+void StatusPopup::onOpenCustomStatus(CCObject *)
+{
+    if (auto popup = CustomStatusPopup::create())
+    {
+        popup->show();
+    }
 }

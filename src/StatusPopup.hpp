@@ -12,6 +12,7 @@ protected:
     void checkGeodeStatus();
     void checkArgonStatus();
     void onModSettings(CCObject *sender);
+    void onOpenCustomStatus(CCObject *sender);
 
     CCLabelBMFont *userInternet = nullptr;
     CCLabelBMFont *serverStatus = nullptr;
