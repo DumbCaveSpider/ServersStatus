@@ -1,6 +1,6 @@
 # v1.0.6
 
-- Added Argon status check <co>(https://argon.globed.dev/)
+- Added Argon status check <co>(https://argon.globed.dev/)</c>
 - Added custom services status checks <cg>(suggested by [BlueToadMaker](user:23859383))</c>
   - <cy>You can add/remove custom status checks</c>
 
