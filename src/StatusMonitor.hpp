@@ -19,6 +19,7 @@ protected:
     bool m_boomlings_ok = false;
     bool m_geode_ok = false;
     bool m_argon_ok = false;
+    bool m_custom_ok = true;
 
 public:
     void onEnter() override;

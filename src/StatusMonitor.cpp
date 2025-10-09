@@ -5,6 +5,9 @@
 #include "StatusMonitor.hpp"
 #include <ctime>
 #include <fmt/chrono.h>
+#include <fstream>
+#include <sstream>
+#include <matjson.hpp>
 #include <iomanip>
 #include <sstream>
 #include <string>
@@ -34,6 +37,20 @@ bool StatusMonitor::init()
     float scale = Mod::get()->getSettingValue<float>("scale");
     auto position = Mod::get()->getSettingValue<std::string>("position");
     float refresh = Mod::get()->getSettingValue<float>("refresh_rate");
+
+    // Load global custom status OK from JSON storage
+    m_custom_ok = true;
+    {
+        std::ifstream in((Mod::get()->getSaveDir() / "status.json").string(), std::ios::in | std::ios::binary);
+        if (in.is_open())
+        {
+            std::ostringstream ss;
+            ss << in.rdbuf();
+            auto str = ss.str();
+            auto json = matjson::parse(str).unwrapOr(matjson::Value());
+            m_custom_ok = json["all_online"].asBool().unwrapOr(true);
+        }
+    }
 
     // position the wifi icon at the top right
     if (position == "Top Right")
@@ -108,21 +125,37 @@ void StatusMonitor::onEnter()
 
 void StatusMonitor::updateStatus(float)
 {
+    // Refresh custom statuses overall OK from JSON
+    {
+        std::ifstream in((Mod::get()->getSaveDir() / "status.json").string(), std::ios::in | std::ios::binary);
+        if (in.is_open())
+        {
+            std::ostringstream ss;
+            ss << in.rdbuf();
+            auto str = ss.str();
+            auto json = matjson::parse(str).unwrapOr(matjson::Value());
+            m_custom_ok = json["all_online"].asBool().unwrapOr(true);
+        }
+        else
+        {
+            m_custom_ok = true;
+        }
+    }
     checkInternetStatus();
     checkBoomlingsStatus();
     checkGeodeStatus();
     checkArgonStatus();
 
     // check if one of them is offline then icon is red
-    if (!m_geode_ok || !m_boomlings_ok || !m_internet_ok || !m_argon_ok)
+    if (!m_custom_ok || !m_geode_ok || !m_boomlings_ok || !m_internet_ok || !m_argon_ok)
     {
         m_icon->setColor({255, 165, 0}); // orange if one service is down
     }
-    if (m_geode_ok && m_boomlings_ok && m_internet_ok && m_argon_ok)
+    if (m_custom_ok && m_geode_ok && m_boomlings_ok && m_internet_ok && m_argon_ok)
     {
         m_icon->setColor({0, 255, 0}); // green is all services are up
     }
-    if (!m_geode_ok && !m_boomlings_ok && !m_internet_ok && !m_argon_ok)
+    if (!m_custom_ok && !m_geode_ok && !m_boomlings_ok && !m_internet_ok && !m_argon_ok)
     {
         m_icon->setColor({255, 0, 0}); // red is all services are down
     }

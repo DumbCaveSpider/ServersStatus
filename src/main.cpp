@@ -5,18 +5,24 @@
 
 using namespace geode::prelude;
 
-class $modify(StatusMenuLayer, MenuLayer) {
-    bool init() {
-        if (!MenuLayer::init()) return false;
-        
+class $modify(StatusMenuLayer, MenuLayer)
+{
+    bool init()
+    {
+        if (!MenuLayer::init())
+            return false;
+
         // target menu as a fall back
-        CCMenu* targetMenu = nullptr;
-        if (auto right = this->getChildByID("right-side-menu")) {
-            targetMenu = typeinfo_cast<CCMenu*>(right);
+        CCMenu *targetMenu = nullptr;
+        if (auto right = this->getChildByID("right-side-menu"))
+        {
+            targetMenu = typeinfo_cast<CCMenu *>(right);
         }
-        if (!targetMenu) {
-            if (auto closeMenu = this->getChildByID("close-menu")) {
-                targetMenu = typeinfo_cast<CCMenu*>(closeMenu);
+        if (!targetMenu)
+        {
+            if (auto closeMenu = this->getChildByID("close-menu"))
+            {
+                targetMenu = typeinfo_cast<CCMenu *>(closeMenu);
             }
         }
         auto wifiIcon = CCSprite::create("wifiIcon.png"_spr);
@@ -26,18 +32,19 @@ class $modify(StatusMenuLayer, MenuLayer) {
             CircleButtonSprite::create(
                 wifiIcon,
                 CircleBaseColor::Green,
-                CircleBaseSize::Medium
-            ),
+                CircleBaseSize::Medium),
             this,
-            menu_selector(StatusMenuLayer::onStatusButton)
-        );
+            menu_selector(StatusMenuLayer::onStatusButton));
 
         statusButton->setScale(0.4f);
 
-        if (targetMenu) {
+        if (targetMenu)
+        {
             targetMenu->addChild(statusButton);
             targetMenu->updateLayout();
-        } else {
+        }
+        else
+        {
             auto fallbackMenu = CCMenu::create();
             fallbackMenu->setID("internet-status-fallback-menu");
             fallbackMenu->setPosition({0.f, 0.f});
@@ -49,8 +56,10 @@ class $modify(StatusMenuLayer, MenuLayer) {
         }
 
         // create StatusMonitor if it doesn't exist and keep it across scenes
-        if (scene && !scene->getChildByID("status-monitor")) {
-            if (auto monitor = StatusMonitor::create()) {
+        if (scene && !scene->getChildByID("status-monitor"))
+        {
+            if (auto monitor = StatusMonitor::create())
+            {
                 monitor->setID("status-monitor");
                 monitor->setPosition({0, 0});
                 this->addChild(monitor);
@@ -60,11 +69,14 @@ class $modify(StatusMenuLayer, MenuLayer) {
 
         return true;
     }
-    void onEnter() {
+    void onEnter()
+    {
         MenuLayer::onEnter();
     }
-    void onStatusButton(CCObject*) {
-        if (auto popup = StatusPopup::create()) {
+    void onStatusButton(CCObject *)
+    {
+        if (auto popup = StatusPopup::create())
+        {
             popup->show();
         }
     }

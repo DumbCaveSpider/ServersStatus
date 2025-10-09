@@ -1,5 +1,6 @@
 # Servers Status
-Display the server and internet connection status in-game! It checks if <cg>Geode</c>, <cg>Boomlings</c>, and your <cg>Internet Connection</c> are up or down, and displays the icon status as well as a popup with more information.
+Display the server and internet connection status in-game! It checks if <cg>Geode</c>, <cg>Boomlings</c>, <cg>Globed's Argon</c> and your <cg>Internet Connection</c> are up or down, and displays the icon status as well as a popup with more information.
+You can also add your own custom services to check if they are up or down!
 
 The following colors are used to indicate the icon status:
 - <cg>Green: All services are up</c>

@@ -1,7 +1,8 @@
 # v1.0.6
 
-- Added Argon status check
-- Added custom server status checks (You can add your own url to check if is up or down)
+- Added Argon status check <co>(https://argon.globed.dev/)
+- Added custom services status checks <cg>(suggested by [BlueToadMaker](user:23859383))</c>
+  - <cy>You can add/remove custom status checks</c>
 
 # v1.0.5
 

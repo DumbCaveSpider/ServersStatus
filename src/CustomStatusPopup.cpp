@@ -6,6 +6,7 @@
 #include <string>
 #include <fmt/format.h>
 #include <ctime>
+#include "StatusStorage.hpp"
 
 using namespace geode::prelude;
 
@@ -42,7 +43,8 @@ bool CustomStatusPopup::setup()
     m_mainLayer->addChild(m_scrollLayer);
 
     m_scrollContent = m_scrollLayer->m_contentLayer;
-    if (m_scrollContent) {
+    if (m_scrollContent)
+    {
         m_scrollContent->ignoreAnchorPointForPosition(false);
         m_scrollContent->setContentSize(bgScroll->getContentSize());
         m_scrollContent->setPosition({0.f, 0.f});
@@ -61,18 +63,27 @@ bool CustomStatusPopup::setup()
     addButton->setID("custom-status-add-button");
     menu->addChild(addButton);
 
-    // Restore nodes from save
-    if (auto* mod = Mod::get()) {
-        // saved count
-        int count = mod->getSavedValue<int>("s_count", 0);
+    // Restore nodes from JSON storage
+    {
+        auto stored = StatusStorage::load();
         m_nodes.clear();
-        for (int i = 0; i < count; ++i) {
-            std::string id = mod->getSavedValue<std::string>(fmt::format("s_node_{}_id", i), "");
-            if (id.empty()) continue;
-            // Name and URL will be loaded by StatusNode from its own keys
-            auto name = mod->getSavedValue<std::string>(std::string("s_") + id + "_name", fmt::format("Custom Status {}", i + 1));
-            auto url = mod->getSavedValue<std::string>(std::string("s_") + id + "_url", "https://example.com");
-            if (auto node = StatusNode::create(name, url, id)) {
+        size_t i = 0;
+        for (auto const &s : stored)
+        {
+            auto name = s.name.empty() ? fmt::format("Custom Status {}", ++i) : s.name;
+            auto url = s.url;
+            if (auto node = StatusNode::create(name, url, s.id))
+            {
+                node->setOnDelete([this](StatusNode *n)
+                                  {
+                    // Remove from storage
+                    auto list = StatusStorage::load();
+                    StatusStorage::removeById(list, n->getID());
+                    StatusStorage::save(list);
+                    // Remove from UI
+                    m_nodes.erase(std::remove(m_nodes.begin(), m_nodes.end(), n), m_nodes.end());
+                    if (n->getParent()) n->removeFromParentAndCleanup(true);
+                    refreshLayout(); });
                 m_scrollContent->addChild(node);
                 m_nodes.push_back(node);
             }
@@ -80,6 +91,7 @@ bool CustomStatusPopup::setup()
     }
 
     refreshLayout();
+    // Global flag stored inside the JSON is updated on save; nothing to do here
 
     return true;
 }
@@ -87,26 +99,26 @@ bool CustomStatusPopup::setup()
 void CustomStatusPopup::onAdd(CCObject *)
 {
     const auto index = m_nodes.size() + 1;
-    auto name = std::string("Custom Status ") + std::to_string(index);
-    auto url = std::string("https://example.com");
-    // Generate a unique stable ID
+    auto name = std::string("") + std::to_string(index);
+    auto url = std::string("");
     auto id = fmt::format("status_{}", geode::utils::string::toLower(std::to_string(time(nullptr))) + std::string("_") + std::to_string(index));
 
     if (auto node = StatusNode::create(name, url, id))
     {
+        node->setOnDelete([this](StatusNode *n)
+                          {
+            auto list = StatusStorage::load();
+            StatusStorage::removeById(list, n->getID());
+            StatusStorage::save(list);
+            m_nodes.erase(std::remove(m_nodes.begin(), m_nodes.end(), n), m_nodes.end());
+            if (n->getParent()) n->removeFromParentAndCleanup(true);
+            refreshLayout(); });
         m_scrollContent->addChild(node);
         m_nodes.push_back(node);
-        // Save list
-        if (auto* mod = Mod::get()) {
-            mod->setSavedValue<int>("s_count", static_cast<int>(m_nodes.size()));
-            for (size_t i = 0; i < m_nodes.size(); ++i) {
-                mod->setSavedValue<std::string>(fmt::format("s_node_{}_id", i), m_nodes[i]->getID());
-            }
-            // Save this node's content under its id (node also saves on change)
-            auto base = std::string("s_") + m_nodes.back()->getID();
-            mod->setSavedValue<std::string>(base + "_name", m_nodes.back()->getName());
-            mod->setSavedValue<std::string>(base + "_url", m_nodes.back()->getUrl());
-        }
+        // Persist new node
+        auto list = StatusStorage::load();
+        StatusStorage::upsertNode(list, StoredNode{id, name, url, false});
+        StatusStorage::save(list);
         refreshLayout();
     }
 }
@@ -147,5 +159,5 @@ void CustomStatusPopup::refreshLayout()
         cursor -= padding;
     }
 
-    //m_scrollLayer->scrollToTop();
+    // m_scrollLayer->scrollToTop();
 }
