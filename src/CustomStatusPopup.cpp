@@ -1,5 +1,6 @@
 #include <Geode/Geode.hpp>
 #include <Geode/ui/GeodeUI.hpp>
+#include <Geode/ui/Border.hpp>
 #include "CustomStatusPopup.hpp"
 #include "StatusNode.hpp"
 #include <algorithm>
@@ -27,18 +28,17 @@ bool CustomStatusPopup::setup()
     setTitle("Custom Status");
 
     auto contentSize = m_mainLayer->getContentSize();
-    auto bgScroll = CCScale9Sprite::create("square02_001.png");
-    bgScroll->setOpacity(100);
+    auto bgScroll = CCScale9Sprite::create("geode.loader/inverseborder.png");
     bgScroll->setContentSize({contentSize.width - 20.f, contentSize.height - 60.f});
     bgScroll->setPosition({contentSize.width / 2.f, contentSize.height / 2.f - 5.f});
-    m_mainLayer->addChild(bgScroll);
+    m_mainLayer->addChild(bgScroll, 5);
 
     // scroll layer
     m_scrollLayer = ScrollLayer::create(bgScroll->getContentSize(), true, true);
     m_scrollLayer->ignoreAnchorPointForPosition(false);
     m_scrollLayer->setAnchorPoint({0.5f, 0.5f});
     m_scrollLayer->setPosition(bgScroll->getPosition());
-    m_scrollLayer->setContentSize(bgScroll->getContentSize());
+    m_scrollLayer->setContentSize(bgScroll->getContentSize() + 1.f);
     m_scrollLayer->setID("custom-status-scroll-layer");
     m_mainLayer->addChild(m_scrollLayer);
 
