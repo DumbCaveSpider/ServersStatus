@@ -30,7 +30,7 @@ bool CustomStatusPopup::setup()
     auto contentSize = m_mainLayer->getContentSize();
     // @geode-ignore(unknown-resource)
     auto bgScroll = CCScale9Sprite::create("geode.loader/inverseborder.png");
-    bgScroll->setContentSize({contentSize.width - 20.f, contentSize.height - 63.f});
+    bgScroll->setContentSize({contentSize.width - 20.f, contentSize.height - 62.f});
     bgScroll->setPosition({contentSize.width / 2.f, contentSize.height / 2.f - 5.f});
     m_mainLayer->addChild(bgScroll, 5);
 
@@ -39,7 +39,7 @@ bool CustomStatusPopup::setup()
     m_scrollLayer->ignoreAnchorPointForPosition(false);
     m_scrollLayer->setAnchorPoint({0.5f, 0.5f});
     m_scrollLayer->setPosition(bgScroll->getPosition());
-    m_scrollLayer->setContentSize({bgScroll->getContentSize().width, bgScroll->getContentSize().height + 1.f});
+    m_scrollLayer->setContentSize({bgScroll->getContentSize().width, bgScroll->getContentSize().height});
     m_scrollLayer->setID("custom-status-scroll-layer");
     m_mainLayer->addChild(m_scrollLayer);
 
@@ -47,8 +47,13 @@ bool CustomStatusPopup::setup()
     if (m_scrollContent)
     {
         m_scrollContent->ignoreAnchorPointForPosition(false);
-        m_scrollContent->setContentSize({bgScroll->getContentSize().width, bgScroll->getContentSize().height + 20.f});
+        m_scrollContent->setContentSize({bgScroll->getContentSize().width, bgScroll->getContentSize().height});
         m_scrollContent->setPosition({0.f, 0.f});
+
+        auto layout = geode::SimpleAxisLayout::create(geode::Axis::Column);
+        layout->setGap(5.f);
+        layout->setMainAxisScaling(geode::AxisScaling::Fit);
+        m_scrollContent->setLayout(layout);
     }
 
     auto menu = CCMenu::create();
@@ -92,7 +97,6 @@ bool CustomStatusPopup::setup()
     }
 
     refreshLayout();
-    // Global flag stored inside the JSON is updated on save; nothing to do here
 
     return true;
 }
@@ -127,38 +131,7 @@ void CustomStatusPopup::onAdd(CCObject *)
 void CustomStatusPopup::refreshLayout()
 {
     if (!m_scrollLayer || !m_scrollContent)
-    {
         return;
-    }
-
-    const float padding = 8.f;
-    const auto viewSize = m_scrollLayer->getContentSize();
-
-    float totalHeight = 0.f;
-    for (auto node : m_nodes)
-    {
-        if (!node)
-            continue;
-        totalHeight += node->getPreferredHeight();
-    }
-    if (!m_nodes.empty())
-    {
-        totalHeight += padding * static_cast<float>(m_nodes.size() - 1);
-    }
-    totalHeight = std::max(totalHeight, viewSize.height);
-
-    m_scrollContent->setContentSize({viewSize.width, totalHeight});
-
-    float cursor = totalHeight;
-    for (auto node : m_nodes)
-    {
-        if (!node)
-            continue;
-        const float h = node->getPreferredHeight();
-        cursor -= h;
-        node->setPosition({viewSize.width / 2.f, cursor + h / 2.f});
-        cursor -= padding;
-    }
-
-    // m_scrollLayer->scrollToTop();
+    // With SimpleAxisLayout, layout is handled automatically
+    m_scrollContent->updateLayout();
 }

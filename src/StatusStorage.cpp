@@ -4,6 +4,7 @@
 #include <algorithm>
 
 using namespace geode::prelude;
+using namespace geode::utils;
 
 namespace
 {
@@ -27,7 +28,7 @@ namespace
 std::vector<StoredNode> StatusStorage::load()
 {
     std::vector<StoredNode> out;
-    auto str = geode::utils::file::readString(storagePath()).unwrapOr("");
+    auto str = file::readString(storagePath()).unwrapOr("");
     if (str.empty())
         return out;
     auto json = matjson::parse(str).unwrapOr(matjson::Value());
@@ -65,7 +66,7 @@ void StatusStorage::save(std::vector<StoredNode> const &nodes)
     root.set("nodes", arr);
     root.set("all_online", computeAllOnline(nodes));
     auto dump = root.dump();
-    geode::utils::file::writeString(storagePath(), dump);
+    file::writeString(storagePath(), dump);
 }
 
 std::optional<StoredNode> StatusStorage::getById(std::vector<StoredNode> const &nodes, std::string const &id)

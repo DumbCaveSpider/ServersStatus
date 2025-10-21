@@ -11,7 +11,7 @@ using namespace geode::utils;
 namespace
 {
     const float kNodeWidth = 315.f;
-    const float kNodeHeight = 72.f;
+    const float kNodeHeight = 70.f;
     const float kIconOffsetX = 24.f;
     const float kTextOffsetX = 50.f;
     const float kInputWidth = kNodeWidth - kTextOffsetX - 54.f;
@@ -51,7 +51,7 @@ bool StatusNode::init(std::string const &name, std::string const &url, std::stri
         bg->setContentSize({kNodeWidth, kNodeHeight});
         bg->setOpacity(75);
         bg->setAnchorPoint({0.5f, 0.5f});
-        bg->setPosition({kNodeWidth / 2.f, kNodeHeight / 2.f - 5.f});
+        bg->setPosition({kNodeWidth / 2.f, kNodeHeight / 2.f});
         this->addChild(bg);
     }
 
@@ -60,7 +60,7 @@ bool StatusNode::init(std::string const &name, std::string const &url, std::stri
     if (m_statusIcon)
     {
         m_statusIcon->setAnchorPoint({0.5f, 0.5f});
-        m_statusIcon->setPosition({kIconOffsetX, kNodeHeight / 2.f - 5.f});
+        m_statusIcon->setPosition({kIconOffsetX, kNodeHeight / 2.f});
         m_statusIcon->setScale(0.6f);
         this->addChild(m_statusIcon, 1);
     }
@@ -83,7 +83,7 @@ bool StatusNode::init(std::string const &name, std::string const &url, std::stri
         m_nameInput->setCommonFilter(CommonFilter::Any);
         m_nameInput->setMaxCharCount(64);
         m_nameInput->setTextAlign(TextInputAlign::Left);
-        m_nameInput->setPosition({kTextOffsetX + kInputWidth / 2.f, kNodeHeight / 2.f + 13.f});
+        m_nameInput->setPosition({kTextOffsetX + kInputWidth / 2.f, kNodeHeight / 2.f + 16.f});
         m_nameInput->setString(m_name);
         m_nameInput->setCallback([this](std::string const &value)
                                  {
@@ -103,7 +103,7 @@ bool StatusNode::init(std::string const &name, std::string const &url, std::stri
         m_urlInput->setCommonFilter(CommonFilter::Any);
         m_urlInput->setMaxCharCount(256);
         m_urlInput->setTextAlign(TextInputAlign::Left);
-        m_urlInput->setPosition({kTextOffsetX + kInputWidth / 2.f, kNodeHeight / 2.f - 21.f});
+        m_urlInput->setPosition({kTextOffsetX + kInputWidth / 2.f, kNodeHeight / 2.f - 16.f});
         m_urlInput->setString(m_url);
         m_urlInput->setCallback([this](std::string const &value)
                                 {
@@ -130,7 +130,7 @@ bool StatusNode::init(std::string const &name, std::string const &url, std::stri
     if (auto menu = CCMenu::create())
     {
         menu->setAnchorPoint({0.f, 0.f});
-        menu->setPosition({kNodeWidth - 22.f, -5.f});
+        menu->setPosition({kNodeWidth - 22.f, 0.f});
         this->addChild(menu, 2);
         auto pingSpr = CircleButtonSprite::createWithSprite(
             "ping.png"_spr,
