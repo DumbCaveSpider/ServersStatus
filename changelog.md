@@ -1,3 +1,8 @@
+# v1.0.7
+
+- there heres an update....
+- Fixed the use of inbuilt file system function in favor for geode utils (boring stuff)
+
 # v1.0.6
 
 - Added Argon status check <co>(https://argon.globed.dev/)</c>

@@ -1,7 +1,6 @@
 #include "StatusStorage.hpp"
 #include <matjson.hpp>
-#include <fstream>
-#include <sstream>
+#include <geode/utils/file.hpp>
 #include <algorithm>
 
 using namespace geode::prelude;
@@ -28,12 +27,9 @@ namespace
 std::vector<StoredNode> StatusStorage::load()
 {
     std::vector<StoredNode> out;
-    std::ifstream in(storagePath(), std::ios::in | std::ios::binary);
-    if (!in.is_open())
+    auto str = geode::utils::file::readString(storagePath()).unwrapOr("");
+    if (str.empty())
         return out;
-    std::ostringstream ss;
-    ss << in.rdbuf();
-    auto str = ss.str();
     auto json = matjson::parse(str).unwrapOr(matjson::Value());
     auto nodesVal = json["nodes"];
     if (nodesVal.isArray())
@@ -69,12 +65,7 @@ void StatusStorage::save(std::vector<StoredNode> const &nodes)
     root.set("nodes", arr);
     root.set("all_online", computeAllOnline(nodes));
     auto dump = root.dump();
-    std::ofstream out(storagePath(), std::ios::out | std::ios::binary);
-    if (out.is_open())
-    {
-        out << dump;
-        out.close();
-    }
+    geode::utils::file::writeString(storagePath(), dump);
 }
 
 std::optional<StoredNode> StatusStorage::getById(std::vector<StoredNode> const &nodes, std::string const &id)

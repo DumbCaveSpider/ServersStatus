@@ -28,8 +28,9 @@ bool CustomStatusPopup::setup()
     setTitle("Custom Status");
 
     auto contentSize = m_mainLayer->getContentSize();
+    // @geode-ignore(unknown-resource)
     auto bgScroll = CCScale9Sprite::create("geode.loader/inverseborder.png");
-    bgScroll->setContentSize({contentSize.width - 20.f, contentSize.height - 60.f});
+    bgScroll->setContentSize({contentSize.width - 20.f, contentSize.height - 63.f});
     bgScroll->setPosition({contentSize.width / 2.f, contentSize.height / 2.f - 5.f});
     m_mainLayer->addChild(bgScroll, 5);
 
@@ -38,7 +39,7 @@ bool CustomStatusPopup::setup()
     m_scrollLayer->ignoreAnchorPointForPosition(false);
     m_scrollLayer->setAnchorPoint({0.5f, 0.5f});
     m_scrollLayer->setPosition(bgScroll->getPosition());
-    m_scrollLayer->setContentSize(bgScroll->getContentSize() + 1.f);
+    m_scrollLayer->setContentSize({bgScroll->getContentSize().width, bgScroll->getContentSize().height + 1.f});
     m_scrollLayer->setID("custom-status-scroll-layer");
     m_mainLayer->addChild(m_scrollLayer);
 
@@ -46,7 +47,7 @@ bool CustomStatusPopup::setup()
     if (m_scrollContent)
     {
         m_scrollContent->ignoreAnchorPointForPosition(false);
-        m_scrollContent->setContentSize(bgScroll->getContentSize());
+        m_scrollContent->setContentSize({bgScroll->getContentSize().width, bgScroll->getContentSize().height + 20.f});
         m_scrollContent->setPosition({0.f, 0.f});
     }
 
