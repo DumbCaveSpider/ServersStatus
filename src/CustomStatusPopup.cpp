@@ -132,6 +132,5 @@ void CustomStatusPopup::refreshLayout()
 {
     if (!m_scrollLayer || !m_scrollContent)
         return;
-    // With SimpleAxisLayout, layout is handled automatically
     m_scrollContent->updateLayout();
 }

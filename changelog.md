@@ -2,6 +2,7 @@
 
 - there heres an update....
 - Fixed the use of inbuilt file system function in favor for geode utils (boring stuff)
+- Tweak Custom Status UI
 
 # v1.0.6
 
