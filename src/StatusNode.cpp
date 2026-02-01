@@ -31,7 +31,7 @@ StatusNode *StatusNode::create(std::string const &name, std::string const &url, 
         ret->autorelease();
         return ret;
     }
-    CC_SAFE_DELETE(ret);
+    delete ret;
     return nullptr;
 }
 
