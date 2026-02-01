@@ -1,6 +1,7 @@
 #include <Geode/Geode.hpp>
 #include <Geode/binding/GameToolbox.hpp>
 #include <Geode/utils/web.hpp>
+#include <Geode/utils/async.hpp>
 #include <Geode/ui/GeodeUI.hpp>
 #include "StatusPopup.hpp"
 #include "StatusMonitor.hpp"
@@ -11,7 +12,7 @@ using namespace geode::prelude;
 StatusPopup *StatusPopup::create()
 {
     auto ret = new StatusPopup();
-    if (ret && ret->initAnchored(300.f, 200.f))
+    if (ret && ret->init())
     {
         ret->autorelease();
         return ret;
@@ -20,8 +21,10 @@ StatusPopup *StatusPopup::create()
     return nullptr;
 }
 
-bool StatusPopup::setup()
+bool StatusPopup::init()
 {
+    if (!Popup::init(300.f, 200.f)) return false;
+
     setTitle("Servers Status");
     auto winSize = CCDirector::sharedDirector()->getWinSize();
 
@@ -124,7 +127,7 @@ bool StatusPopup::setup()
     customMenu->setPosition({centerX, 0.f});
     m_mainLayer->addChild(customMenu, 5);
 
-    auto customButtonSprite = ButtonSprite::create("Show Custom", "goldFont.fnt", "GJ_button_01.png", 0.65f);
+    auto customButtonSprite = ButtonSprite::create("Show Custom");
 
     auto customButton = CCMenuItemSpriteExtra::create(
         customButtonSprite,
@@ -176,21 +179,23 @@ void StatusPopup::checkInternetStatus()
         return;
     }
     auto url = Mod::get()->getSettingValue<std::string>("internet_url");
-    geode::utils::web::WebRequest().get(url).listen([this, url](geode::utils::web::WebResponse *response)
-                                                    {
-        if (!response || !response->ok()) {
-            log::debug("{} offline or unreachable", url);
-            if (userInternet) {
-                userInternet->setString("Internet Status: Offline");
-                userInternet->setColor({ 255, 0, 0 });
+    m_internetTask.cancel();
+    m_internetTask.spawn(
+        geode::utils::web::WebRequest().get(url),
+        [this, url](geode::utils::web::WebResponse response) {
+            if (!response.ok()) {
+                log::debug("{} offline or unreachable", url);
+                if (userInternet) {
+                    userInternet->setString("Internet Status: Offline");
+                    userInternet->setColor({ 255, 0, 0 });
+                }
+                return;
             }
-            return;
-        }
-        log::debug("{} online", url);
-        if (userInternet) {
-            userInternet->setString("Internet Status: Online");
-            userInternet->setColor({ 0, 255, 0 });
-        } });
+            log::debug("{} online", url);
+            if (userInternet) {
+                userInternet->setString("Internet Status: Online");
+                userInternet->setColor({ 0, 255, 0 });
+            } });
 }
 
 void StatusPopup::checkBoomlingsStatus()
@@ -199,12 +204,13 @@ void StatusPopup::checkBoomlingsStatus()
     auto url = "http://www.boomlings.com/database/getGJLevels21.php";
     auto body = "type=2&secret=Wmfd2893gb7"; // most liked level
 
-    geode::utils::web::WebRequest()
-        .bodyString(body)
-        .post(url)
-        .listen([this](geode::utils::web::WebResponse *response)
-                {
-            if (!response || response->code() != 200) {
+    m_boomlingsTask.cancel();
+    m_boomlingsTask.spawn(
+        geode::utils::web::WebRequest()
+            .bodyString(body)
+            .post(url),
+        [this](geode::utils::web::WebResponse response) {
+            if (!response.ok() || response.code() != 200) {
                 log::debug("Boomlings server offline or unreachable");
                 if (serverStatus) {
                     serverStatus->setString("Boomlings Status: Offline");
@@ -222,9 +228,11 @@ void StatusPopup::checkBoomlingsStatus()
 void StatusPopup::checkGeodeStatus()
 {
     log::debug("checking GeodeSDK status");
-    geode::utils::web::WebRequest().get("https://api.geode-sdk.org").listen([this](geode::utils::web::WebResponse *response)
-                                                                            {
-        if (!response || !response->ok()) {
+    m_geodeTask.cancel();
+    m_geodeTask.spawn(
+        geode::utils::web::WebRequest().get("https://api.geode-sdk.org"),
+        [this](geode::utils::web::WebResponse response) {
+        if (!response.ok()) {
             log::debug("GeodeSDK offline or unreachable");
             if (geodeStatus) {
                 geodeStatus->setString("GeodeSDK Status: Offline");
@@ -244,9 +252,11 @@ void StatusPopup::checkArgonStatus()
     log::debug("checking Argon server status");
     auto url = "https://argon.globed.dev/";
 
-    geode::utils::web::WebRequest().get(url).listen([this, url](geode::utils::web::WebResponse *response)
-                                                    {
-                    if (!response || response->code() != 200) {
+    m_argonTask.cancel();
+    m_argonTask.spawn(
+        geode::utils::web::WebRequest().get(url),
+        [this, url](geode::utils::web::WebResponse response) {
+                    if (!response.ok() || response.code() != 200) {
                         log::debug("Argon server offline or unreachable");
                         if (argonStatus) {
                             argonStatus->setString("Argon Status: Offline");

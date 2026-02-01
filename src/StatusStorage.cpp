@@ -42,6 +42,7 @@ std::vector<StoredNode> StatusStorage::load()
             n.name = v["name"].asString().unwrapOr("");
             n.url = v["url"].asString().unwrapOr("");
             n.online = v["online"].asBool().unwrapOr(false);
+            n.last_ping = v["last_ping"].asString().unwrapOr("");
             if (!n.id.empty())
                 out.push_back(std::move(n));
         }
@@ -60,6 +61,7 @@ void StatusStorage::save(std::vector<StoredNode> const &nodes)
         o.set("name", n.name);
         o.set("url", n.url);
         o.set("online", n.online);
+        o.set("last_ping", n.last_ping);
         arr.emplace_back(o);
     }
     matjson::Value root;

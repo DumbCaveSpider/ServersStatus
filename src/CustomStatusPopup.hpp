@@ -8,10 +8,10 @@ using namespace geode::prelude;
 
 class StatusNode;
 
-class CustomStatusPopup : public Popup<>
+class CustomStatusPopup : public Popup
 {
 protected:
-    bool setup() override;
+    bool init() override;
     void onAdd(CCObject *sender);
     void refreshLayout();
 

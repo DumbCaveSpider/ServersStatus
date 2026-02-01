@@ -1,3 +1,13 @@
+# v1.0.8
+
+- Ported to Geode v5.0.0
+- Fixed the Scrollable area in Custom Status Popup not expanding properly
+- Added option to disable the icon status when in a level
+- Added Padding Icons setting to adjust the distance of the icon from the screen edges
+- Improved web request handling
+- Improved Custom Status UI
+- Added Status Code and Last Ping on Custom Status
+
 # v1.0.7
 
 - there heres an update....
@@ -26,7 +36,7 @@
 
 # v1.0.2
 
-- *i actually did something this time*
+- _i actually did something this time_
 - Fixed the icon color logic, should now be:
   - <cg>Green if all services are up</c>
   - <co>Orange if one or more services are down</c>

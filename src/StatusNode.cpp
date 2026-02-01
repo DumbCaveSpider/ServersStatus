@@ -1,7 +1,12 @@
 #include "StatusNode.hpp"
 #include <algorithm>
 #include <chrono>
+#include <string>
+#include <ctime>
+#include "Timestamp.hpp"
+#include <fmt/format.h>
 #include <Geode/utils/web.hpp>
+#include <Geode/utils/async.hpp>
 #include <regex>
 #include "StatusStorage.hpp"
 
@@ -10,8 +15,8 @@ using namespace geode::utils;
 
 namespace
 {
-    const float kNodeWidth = 315.f;
-    const float kNodeHeight = 70.f;
+    const float kNodeWidth = 320.f;
+    const float kNodeHeight = 90.f;
     const float kIconOffsetX = 24.f;
     const float kTextOffsetX = 50.f;
     const float kInputWidth = kNodeWidth - kTextOffsetX - 54.f;
@@ -45,14 +50,14 @@ bool StatusNode::init(std::string const &name, std::string const &url, std::stri
     m_url = url;
     m_id = id;
 
-    // Background panel
-    if (auto bg = CCScale9Sprite::create("GJ_square05.png"))
+    if (auto bg = CCSprite::create())
     {
-        bg->setContentSize({kNodeWidth, kNodeHeight});
-        bg->setOpacity(75);
+        bg->setTextureRect(CCRectMake(0, 0, kNodeWidth, kNodeHeight));
+        bg->setColor({194, 114, 62});
         bg->setAnchorPoint({0.5f, 0.5f});
         bg->setPosition({kNodeWidth / 2.f, kNodeHeight / 2.f});
         this->addChild(bg);
+        m_bg = bg;
     }
 
     // Status icon
@@ -60,9 +65,15 @@ bool StatusNode::init(std::string const &name, std::string const &url, std::stri
     if (m_statusIcon)
     {
         m_statusIcon->setAnchorPoint({0.5f, 0.5f});
-        m_statusIcon->setPosition({kIconOffsetX, kNodeHeight / 2.f});
+        m_statusIcon->setPosition({kIconOffsetX, kNodeHeight / 2.f + 10.f});
         m_statusIcon->setScale(0.6f);
         this->addChild(m_statusIcon, 1);
+
+        m_statusCodeLabel = CCLabelBMFont::create("Status Code\n-", "chatFont.fnt");
+        m_statusCodeLabel->setScale(0.5f);
+        m_statusCodeLabel->setPosition({kIconOffsetX, kNodeHeight / 2.f - 20.f});
+        m_statusCodeLabel->setAlignment(kCCTextAlignmentCenter);
+        this->addChild(m_statusCodeLabel, 1);
     }
 
     // Load saved defaults from JSON storage
@@ -70,11 +81,12 @@ bool StatusNode::init(std::string const &name, std::string const &url, std::stri
     {
         m_name = sn->name;
         m_url = sn->url;
+        if (!sn->last_ping.empty()) {
+            m_lastPingTimestamp = sn->last_ping;
+        }
     }
 
     float refresh = Mod::get()->getSettingValue<float>("refresh_rate");
-
-    // m_name/m_url were possibly overridden from storage above
 
     // Name input
     m_nameInput = TextInput::create(kInputWidth, "Status name", "bigFont.fnt");
@@ -125,6 +137,15 @@ bool StatusNode::init(std::string const &name, std::string const &url, std::stri
                 m_urlInvalidNotified = false;
             } });
         this->addChild(m_urlInput, 1);
+
+        m_lastPingLabel = CCLabelBMFont::create("Last ping: -", "chatFont.fnt");
+        m_lastPingLabel->setScale(0.5f);
+        m_lastPingLabel->setPosition({kTextOffsetX + kInputWidth / 2.f, kNodeHeight / 2.f - 38.f});
+        m_lastPingLabel->setAlignment(kCCTextAlignmentCenter);
+        if (!m_lastPingTimestamp.empty()) {
+            m_lastPingLabel->setString((std::string("Last ping: ") + m_lastPingTimestamp).c_str());
+        }
+        this->addChild(m_lastPingLabel, 1);
     }
     // Buttons on the right: Ping and Delete
     if (auto menu = CCMenu::create())
@@ -140,7 +161,7 @@ bool StatusNode::init(std::string const &name, std::string const &url, std::stri
         auto delSpr = CircleButtonSprite::createWithSprite(
             "delete.png"_spr,
             0.75f,
-            CircleBaseColor::Pink,
+            CircleBaseColor::Green,
             CircleBaseSize::SmallAlt);
 
         pingSpr->setScale(0.75f);
@@ -179,10 +200,17 @@ void StatusNode::updateStatusColor(bool online)
     const ccColor3B green{50, 220, 90};
     const ccColor3B red{220, 60, 60};
     m_statusIcon->setColor(online ? green : red);
+    m_bg->setColor(online ? ccColor3B{100, 200, 100} : ccColor3B{200, 100, 100});
 
     // Save current online state persistently via JSON storage
     auto nodes = StatusStorage::load();
-    StatusStorage::upsertNode(nodes, StoredNode{m_id, m_name, m_url, online});
+    std::string lastPing;
+    if (auto ex = StatusStorage::getById(nodes, m_id)) {
+        lastPing = ex->last_ping;
+    } else {
+        lastPing = m_lastPingTimestamp;
+    }
+    StatusStorage::upsertNode(nodes, StoredNode{m_id, m_name, m_url, online, lastPing});
     StatusStorage::save(nodes);
 }
 
@@ -203,6 +231,7 @@ void StatusNode::checkUrlStatus(bool useLastSaved)
     if (!useLastSaved)
     {
         m_statusIcon->setColor({255, 255, 255});
+        m_bg->setColor({230, 150, 10});
     }
 
     if (useLastSaved)
@@ -213,34 +242,57 @@ void StatusNode::checkUrlStatus(bool useLastSaved)
         this->updateStatusColor(last);
     }
 
-    // Cancel request
-    if (!m_requestTask.isNull() && m_requestTask.isPending())
-    {
-        m_requestTask.cancel();
-    }
+    // Cancel any existing request
+    m_requestTask.cancel();
+
+    if (m_statusCodeLabel) m_statusCodeLabel->setString("Status Code\n-");
+    if (m_lastPingLabel) m_lastPingLabel->setString("Last ping: pending");
 
     // status code
-    m_requestTask = web::WebRequest()
-                        .transferBody(false)
-                        .followRedirects(true)
-                        .timeout(std::chrono::seconds(5))
-                        .get(url);
-
     bool notify = !useLastSaved;
 
-    m_requestTask.listen(
-        [this, notify](web::WebResponse const *res)
-        {
-            bool ok = res && res->ok() && res->code() == 200;
-            queueInMainThread([this, ok, notify]
+    m_requestTask.spawn(
+        web::WebRequest()
+            .transferBody(false)
+            .followRedirects(true)
+            .timeout(std::chrono::seconds(5))
+            .get(url),
+        [this, notify](geode::utils::web::WebResponse res) {
+            bool ok = res.ok() && res.code() == 200;
+            int code = res.code();
+            std::string codeText = code ? ("Status Code\n" + std::to_string(code)) : std::string("Status Code\n-");
+
+            std::string timestamp = getLocalTimestamp();
+            std::string timeText = std::string("Last ping: ") + timestamp;
+
+            if (ok) {
+                auto nodes = StatusStorage::load();
+                if (auto ex = StatusStorage::getById(nodes, m_id)) {
+                    StoredNode copy = *ex;
+                    copy.online = true;
+                    copy.last_ping = timestamp;
+                    StatusStorage::upsertNode(nodes, copy);
+                } else {
+                    StatusStorage::upsertNode(nodes, StoredNode{m_id, m_name, m_url, true, timestamp});
+                }
+                StatusStorage::save(nodes);
+            }
+
+            std::string notifyFmt = ok ? "Ping successful ({})" : "Ping failed ({})";
+            std::string notifyMsg = fmt::format(fmt::runtime(notifyFmt), code);
+
+            queueInMainThread([this, ok, notify, codeText, timeText, timestamp, notifyMsg]
                               {
                 this->updateStatusColor(ok);
+                if (m_statusCodeLabel) m_statusCodeLabel->setString(codeText.c_str());
+                if (ok) {
+                    if (m_lastPingLabel) m_lastPingLabel->setString(timeText.c_str());
+                    this->m_lastPingTimestamp = timestamp;
+                }
                 if (notify) {
-                    Notification::create(ok ? "Ping successful" : "Ping failed", ok ? NotificationIcon::Success : NotificationIcon::Error)->show();
+                    Notification::create(notifyMsg, ok ? NotificationIcon::Success : NotificationIcon::Error)->show();
                 } });
-        },
-        [](web::WebProgress const *) {},
-        [] {});
+        });
 }
 
 void StatusNode::updateStatusTimer(float)
@@ -255,16 +307,26 @@ void StatusNode::onPingPressed(CCObject *)
 
 void StatusNode::onDeletePressed(CCObject *)
 {
-    if (m_onDelete)
-        m_onDelete(this);
+    geode::createQuickPopup(
+        "Delete Status",
+        "Are you sure you want to delete this custom status?",
+        "Cancel",
+        "Delete",
+        320.f,
+        [this](FLAlertLayer* layer, bool btn1) {
+            if (btn1) {
+                if (m_onDelete)
+                    m_onDelete(this);
+            }
+        },
+        true,
+        true
+    );
 }
 
 void StatusNode::onExit()
 {
     // Ensure any pending request is cancelled to avoid callbacks after node is gone
-    if (!m_requestTask.isNull() && m_requestTask.isPending())
-    {
-        m_requestTask.cancel();
-    }
+    m_requestTask.cancel();
     CCLayer::onExit();
-}
+} 

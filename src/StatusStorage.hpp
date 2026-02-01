@@ -4,11 +4,6 @@
 #include <string>
 #include <vector>
 
-// File layout:
-// {
-//   "nodes": [ { "id": string, "name": string, "url": string, "online": bool }, ... ],
-//   "all_online": bool
-// }
 
 struct StoredNode
 {
@@ -16,6 +11,7 @@ struct StoredNode
     std::string name;
     std::string url;
     bool online = false;
+    std::string last_ping;
 };
 
 namespace StatusStorage

@@ -1,14 +1,14 @@
 {
-	"geode": "4.9.0",
+	"geode": "5.0.0-alpha.1",
 	"gd": {
-		"win": "2.2074",
-		"android": "2.2074",
-		"mac": "2.2074",
-		"ios": "2.2074"
+		"win": "2.2081",
+		"android": "2.2081",
+		"mac": "2.2081",
+		"ios": "2.2081"
 	},
 	"id": "arcticwoof.servers_status",
 	"name": "Servers Status",
-	"version": "v1.0.7",
+	"version": "v1.0.8",
 	"developer": "ArcticWoof",
 	"links": {
 		"source": "https://github.com/DumbCaveSpider/ServersStatus",
@@ -29,6 +29,12 @@
 			"description": "Enable or disable the icon status",
 			"default": true
 		},
+		"disableInLevel": {
+			"type": "bool",
+			"name": "Disable In-Level",
+			"description": "Disable the icon status when in a level",
+			"default": false
+		},
 		"title": {
 			"type": "title",
 			"name": "Icon Visual Settings"
@@ -48,6 +54,14 @@
 			"default": 0.4,
 			"min": 0.1,
 			"max": 2.0
+		},
+		"padding": {
+			"type": "float",
+			"name": "Icon Padding",
+			"description": "Set the padding of the icon status from the screen edges",
+			"default": 0,
+			"min": 0,
+			"max": 500
 		},
 		"position": {
 			"type": "string",

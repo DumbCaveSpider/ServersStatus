@@ -15,4 +15,4 @@ The following colors are used to indicate the icon status:
 
 *Suggested by [Pr0Cr4eat3r275](user:30972993)*
 
-![king](arcticwoof.twitch_interactive/king.png)
+![King Clawthorne](arcticwoof.rated_layouts/king.png)

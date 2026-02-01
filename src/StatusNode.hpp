@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Geode/Geode.hpp>
+#include <Geode/utils/async.hpp>
 #include <string>
 #include <functional>
 
@@ -22,7 +23,11 @@ protected:
     TextInput *m_nameInput = nullptr;
     TextInput *m_urlInput = nullptr;
     CCSprite *m_statusIcon = nullptr;
-    web::WebTask m_requestTask;
+    CCLabelBMFont *m_statusCodeLabel = nullptr;
+    CCLabelBMFont *m_lastPingLabel = nullptr;
+    std::string m_lastPingTimestamp;
+    CCSprite *m_bg = nullptr;
+    geode::async::TaskHolder<geode::utils::web::WebResponse> m_requestTask;
     std::function<void(StatusNode *)> m_onDelete;
     bool m_urlInvalidNotified = false;
     void updateStatusColor(bool online);
