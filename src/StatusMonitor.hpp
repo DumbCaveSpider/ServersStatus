@@ -23,6 +23,7 @@ protected:
 
     std::vector<geode::ListenerHandle *> m_settingListeners;
     geode::ListenerHandle m_layerListener{};
+    std::unordered_set<std::string> m_custom_notified;
 
 public:
     void onEnter() override;

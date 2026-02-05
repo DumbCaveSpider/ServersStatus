@@ -14,7 +14,9 @@
 #include <sstream>
 #include <string>
 
+#include "StatusStorage.hpp"
 #include "Timestamp.hpp"
+
 
 using namespace geode::prelude;
 
@@ -40,6 +42,27 @@ bool StatusMonitor::init() {
       auto str = ss.str();
       auto json = matjson::parse(str).unwrapOr(matjson::Value());
       m_custom_ok = json["all_online"].asBool().unwrapOr(true);
+
+      // Notify for any custom nodes that became offline
+      auto nodes = StatusStorage::load();
+      for (auto const &n : nodes) {
+        if (!n.online) {
+          // show notification only once per node until it comes back online
+          if (m_custom_notified.insert(n.id).second) {
+            auto last =
+                n.last_ping.empty() ? std::string("unknown") : n.last_ping;
+            Notification::create(
+                fmt::format("Connection Lost to {} at {}", n.name, last),
+                NotificationIcon::Error)
+                ->show();
+          }
+        } else {
+          // if it's online again, clear the notified flag
+          if (m_custom_notified.find(n.id) != m_custom_notified.end()) {
+            m_custom_notified.erase(n.id);
+          }
+        }
+      }
     }
   }
 
@@ -88,7 +111,8 @@ bool StatusMonitor::init() {
         geode::queueInMainThread([this, newRefresh]() {
           this->unschedule(schedule_selector(StatusMonitor::updateStatus));
           float interval = newRefresh > 0.f ? newRefresh : kFallbackRefresh;
-          this->schedule(schedule_selector(StatusMonitor::updateStatus), interval);
+          this->schedule(schedule_selector(StatusMonitor::updateStatus),
+                         interval);
           this->updateStatus(0.f);
         });
       },
