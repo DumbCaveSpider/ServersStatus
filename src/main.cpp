@@ -1,5 +1,7 @@
 #include <Geode/Geode.hpp>
 #include <Geode/modify/MenuLayer.hpp>
+#include <Geode/modify/CCLayer.hpp>
+#include "Geode/ui/OverlayManager.hpp"
 #include "StatusPopup.hpp"
 #include "StatusMonitor.hpp"
 
@@ -55,15 +57,15 @@ class $modify(StatusMenuLayer, MenuLayer)
             fallbackMenu->addChild(statusButton);
         }
 
-        // create StatusMonitor if it doesn't exist and keep it across scenes
-        if (scene && !scene->getChildByID("status-monitor"))
+        // create StatusMonitor if it doesn't exist in the OverlayManager and keep it across scenes
+        if (OverlayManager::get()->getChildByIDRecursive("status-monitor") == nullptr)
         {
             if (auto monitor = StatusMonitor::create())
             {
                 monitor->setID("status-monitor");
                 monitor->setPosition({0, 0});
                 this->addChild(monitor);
-                SceneManager::get()->keepAcrossScenes(monitor); // note to self: brokey for some people
+                OverlayManager::get()->addChild(monitor);
             }
         }
 
@@ -79,5 +81,21 @@ class $modify(StatusMenuLayer, MenuLayer)
         {
             popup->show();
         }
+    }
+};
+
+class $modify(CCLayer) {
+    void onEnter() {
+        CCLayer::onEnter();
+        // log::debug("icon visibility check on level enter");
+        geode::queueInMainThread([]() {
+            auto overlay = OverlayManager::get();
+            if (!overlay) return;
+            for (auto node : overlay->getChildrenExt<StatusMonitor*>()) {
+                if (auto monitor = typeinfo_cast<StatusMonitor*>(node)) {
+                    monitor->applySettings();
+                }
+            }
+        });
     }
 };

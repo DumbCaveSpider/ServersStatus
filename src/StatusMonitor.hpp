@@ -21,8 +21,15 @@ protected:
     bool m_argon_ok = false;
     bool m_custom_ok = true;
 
+    std::vector<geode::ListenerHandle *> m_settingListeners;
+    geode::ListenerHandle m_layerListener{};
+
 public:
     void onEnter() override;
     static StatusMonitor *create();
     void updateStatus(float);
+    void applySettings();
+
+protected:
+    void updateIconColor();
 };

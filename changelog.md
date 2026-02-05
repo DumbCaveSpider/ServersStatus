@@ -6,6 +6,7 @@
 - Added Padding Icons setting to adjust the distance of the icon from the screen edges
 - Improved web request handling
 - Improved Custom Status UI
+- Added Settings Listeners to automatically apply changes
 - Added Status Code and Last Ping on Custom Status
 
 # v1.0.7
