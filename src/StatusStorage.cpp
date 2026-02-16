@@ -68,7 +68,7 @@ void StatusStorage::save(std::vector<StoredNode> const &nodes)
     root.set("nodes", arr);
     root.set("all_online", computeAllOnline(nodes));
     auto dump = root.dump();
-    file::writeString(storagePath(), dump);
+    file::writeString(storagePath(), dump).unwrap();
 }
 
 std::optional<StoredNode> StatusStorage::getById(std::vector<StoredNode> const &nodes, std::string const &id)
